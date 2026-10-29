@@ -23,6 +23,23 @@ const secondEntry: LearningEntryData = {
 const initialEntries: LearningEntryData[] = [firstEntry, secondEntry];
 
 export default function App() {
+
+  const [serverEntries, setServerEntries] = useState<LearningEntryData[]>([]);
+  const [loadError, setLoadError] = useState("");
+
+  async function loadServerEntries() {
+    setLoadError("");
+    try {
+      const response = await fetch("http://localhost:3001/api/entries");
+      if (!response.ok) throw new Error("Could not load entries");
+      const data: LearningEntryData[] = await response.json();
+      setServerEntries(data);
+    } catch {
+      setLoadError("Could not connect to the backend.");
+    }
+  }
+
+
   const studentName: string = "Lassi Lahtinen";
 
   const [entries, setEntries] = useState<LearningEntryData[]>(initialEntries);
@@ -78,6 +95,19 @@ export default function App() {
         {entries.map((entry) => (
           <LearningEntry key={entry.id} entry={entry} />
         ))}
+      </section>
+
+      <section>
+        <h2>Entries from the backend</h2>
+        <button type="button" onClick={loadServerEntries}>
+          Load from backend
+        </button>
+        {loadError && <p>{loadError}</p>}
+        <ul>
+          {serverEntries.map((entry) => (
+        <li key={entry.id}>{entry.topic}</li>
+        ))}
+        </ul>
       </section>
 
       {/* Form Fields */}
